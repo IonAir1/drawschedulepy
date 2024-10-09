@@ -1,2 +1,2 @@
-# drawtablepy
-Render a pandas data frame into an image
+# drawschedulepy
+draw class schedule to image
