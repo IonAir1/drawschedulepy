@@ -12,19 +12,19 @@ subjects_sample = [
         "Code": "math",
         "Name": "Mathematics",
         "Color": "lightgreen",
-        "Schedule": [['MWF',1,3],['T',1.5,4]]
+        "Schedule": [[0b10101,1,3],[0b10,1.5,4]]
     },
     {
         "Code": "sci",
         "Name": "Science",
         "Color": "pink",
-        "Schedule": [['MWF',3,6],['TH',1.5,4]]
+        "Schedule": [[0b10101,3,6],[0b1000,1.5,4]]
     },
     {
         "Code": "eng",
         "Name": "English",
         "Color": "lightblue",
-        "Schedule": [['T',4,6]]
+        "Schedule": [[0b10,4,6]]
     }
 ]
 
@@ -98,8 +98,48 @@ def render(html, render_size, output):
     hti.screenshot(html_str=html, css_str=css_sample, save_as=output)
 
 
+#build a matrix from "subjects" dictionary schedule
+def build_table(subjects):
+    min_time = 24
+    max_time = 0
+    time_interval = 0.5
+    days = []
+
+    #get schedule range
+    for subject in subjects:
+        for schedule in subject["Schedule"]:
+            #min max time
+            if min(schedule[1:]) < min_time:
+                min_time = min(schedule[1:])
+            if max(schedule[1:]) > max_time:
+                max_time = max(schedule[1:])
+            #days of the week
+            byte = schedule[0]
+            if byte & 1:
+                days.append("Monday") if "Monday" not in days else days
+            if byte >> 1& 1:
+                days.append("Tuesday") if "Tuesday" not in days else days
+            if byte >> 2 & 1:
+                days.append("Wednesday") if "Wednesday" not in days else days
+            if byte >> 3 & 1:
+                days.append("Thursday") if "Thursday" not in days else days
+            if byte >> 4 & 1:
+                days.append("Friday") if "Friday" not in days else days
+            if byte >> 5 & 1:
+                days.append("Saturday") if "Saturday" not in days else days
+            if byte >> 6 & 1:
+                days.append("Sunday") if "Sunday" not in days else days
+            days = sorted(days, key=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday","Saturday","Sunday"].index)
 
 
+
+
+
+    return 0
+
+
+
+build_table(subjects_sample)
 html_table = tabulate(formatted_table, headers, tablefmt="html")
 html = """
     <!DOCTYPE html><html>
