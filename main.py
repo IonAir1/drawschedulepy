@@ -1,31 +1,28 @@
-from tabulate import tabulate
 from html2image import Html2Image
 from bs4 import BeautifulSoup
 import re
 
 
 title = "Schedule"
-headers = ["Time","Monday","Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-formatted_table = [["1:00PM-3:00PM","math","sci","math","sci","math"],["3:00PM-6:00PM","duplicate","duplicate","eng","break","eng"]]
 subjects_sample = [
     {
         "Code": "math",
         "Name": "Mathematics",
         "Color": "lightgreen",
         "Schedule": [[0b10101,1,3],[0b10,1.5,4]]
+    },
+    {
+        "Code": "sci",
+        "Name": "Science",
+        "Color": "pink",
+        "Schedule": [[0b10101,5,6],[0b1000,1.5,4]]
+    },
+    {
+        "Code": "eng",
+        "Name": "English",
+        "Color": "lightblue",
+        "Schedule": [[0b10,4,6]]
     }
-    # {
-    #     "Code": "sci",
-    #     "Name": "Science",
-    #     "Color": "pink",
-    #     "Schedule": [[0b10101,5,6],[0b1000,1.5,4]]
-    # },
-    # {
-    #     "Code": "eng",
-    #     "Name": "English",
-    #     "Color": "lightblue",
-    #     "Schedule": [[0b10,4,6]]
-    # }
 ]
 
 css_sample = """
@@ -39,7 +36,7 @@ css_sample = """
 
     h1 {
         margin: 0;
-        font-size: 20px;
+        font-size: 15px;
     }
 
     th {
@@ -55,45 +52,6 @@ css_sample = """
         border: 1px solid;
     }
 """
-
-
-#merge cells containing "duplicate" with the cell above
-def merge_cells(html):
-    soup = BeautifulSoup(html, "html.parser")
-
-    rows = soup.find('tbody').find_all('tr')
-    old_rows = rows.copy()
-
-    for row in rows:
-
-        row_above = old_rows[rows.index(row) - 1]
-        duplicates = row.find_all('td', string=re.compile("duplicate"))
-
-        for duplicate in duplicates:
-
-            if rows.index(row) > 2:
-                break
-
-            print(str(row_above), [duplicate.parent.index(duplicate)])
-            cell_above = row_above.find_all('td')[duplicate.parent.index(duplicate)]
-            # print(str(row_above),cell_above)
-            print(cell_above)
-            while "duplicate" in cell_above.string:
-                row_above = old_rows[rows.index(row_above) - 1]
-
-                cell_above = row_above.find_all('td')[duplicate.parent.index(duplicate)]
-            print(cell_above)
-
-            cell_change = rows.find_all('tr')[old_rows.index(row_above)].find_all('td')[row_above.index(cell_above)]
-            if not 'rowspan' in cell_above.attrs:
-                cell_change.attrs['rowspan'] = 1
-            # print(row_above)
-            cell_change.attrs['rowspan'] += 1
-        
-        for duplicate in rows.find_all('td', string=re.compile("duplicate")):
-            duplicate.decompose()
-
-    return soup.find('table')
 
 
 #replace subject codes with names, add classes to the cells, and style the colors properly
@@ -138,7 +96,7 @@ def format_time(time, am_pm):
         return str(int(time)) + ":" + minutes
 
 
-#build a matrix from "subjects" dictionary schedule
+#build an html table from a subjects dictionary
 def build_table(subjects, **kwargs):
     time_interval = kwargs.get("time_interval", 0.5)
     am_pm = kwargs.get("am_pm", True)
@@ -161,7 +119,7 @@ def build_table(subjects, **kwargs):
             #add subject to all time slots within the specified range
             time_slots = []
             min_schedule = int(schedule[1] / time_interval)
-            time_slot_ammount = int((schedule[2] - schedule[1]) / time_interval) + 1
+            time_slot_ammount = int((schedule[2] - schedule[1]) / time_interval)
             for i in range(time_slot_ammount):
                 time_slots.append(min_schedule + i)
 
@@ -170,51 +128,51 @@ def build_table(subjects, **kwargs):
                 days.append("Monday") if "Monday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][1] = subject['Code']
+                        schedule_table[time_slot][1] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][1] = "duplicate"
+                        schedule_table[time_slot][1] = "^^"
             if byte >> 1& 1:
                 days.append("Tuesday") if "Tuesday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][2] = subject['Code']
+                        schedule_table[time_slot][2] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][2] = "duplicate"
+                        schedule_table[time_slot][2] = "^^"
             if byte >> 2 & 1:
                 days.append("Wednesday") if "Wednesday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][3] = subject['Code']
+                        schedule_table[time_slot][3] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][3] = "duplicate"
+                        schedule_table[time_slot][3] = "^^"
             if byte >> 3 & 1:
                 days.append("Thursday") if "Thursday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][4] = subject['Code']
+                        schedule_table[time_slot][4] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][4] = "duplicate"
+                        schedule_table[time_slot][4] = "^^"
             if byte >> 4 & 1:
                 days.append("Friday") if "Friday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][5] = subject['Code']
+                        schedule_table[time_slot][5] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][5] = "duplicate"
+                        schedule_table[time_slot][5] = "^^"
             if byte >> 5 & 1:
                 days.append("Saturday") if "Saturday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][6] = subject['Code']
+                        schedule_table[time_slot][6] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][6] = "duplicate"
+                        schedule_table[time_slot][6] = "^^"
             if byte >> 6 & 1:
                 days.append("Sunday") if "Sunday" not in days else days
                 for time_slot in time_slots:
                     if time_slots.index(time_slot) == 0:
-                        schedule_table[time_slot][7] = subject['Code']
+                        schedule_table[time_slot][7] = (subject['Code'], time_slot_ammount)
                     else:
-                        schedule_table[time_slot][7] = "duplicate"
+                        schedule_table[time_slot][7] = "^^"
             
     #remove empty time
     old_schedule_table = schedule_table.copy()
@@ -230,26 +188,51 @@ def build_table(subjects, **kwargs):
             break
         else:
             schedule_table.pop(-1)
+    
+    #remove empty days
+    days = sorted(days, key=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index)
+    deleted_days = 0
+    for i in range(7):
+        empty = True
+        for period in schedule_table:
+            if period[i+1-deleted_days] != "":
+                empty = False
+        if empty:
+            for period in schedule_table:
+                period.pop(i+1-deleted_days)
+            deleted_days += 1
+            
 
-    #add function to remove empty days
+    #format to html
+    formatted_table = "<tr><th>Time</th>"
+    for day in days:
+        formatted_table += "<th>{}</th>".format(day)
+    formatted_table += "</tr>"
+    
+    for row in schedule_table:
+        formatted_row = ""
+        for cell in row:
+            if type(cell) is str:
+                if cell != "^^":
+                    formatted_row += "<td>{}</td>".format(cell)
+            else:
+                if cell[1] > 1:
+                    formatted_row += "<td rowspan={}>{}</td>".format(cell[1], cell[0])
+                else:
+                    formatted_row += "<td/>".format(cell[0])
+        formatted_table += "<tr>{}</tr>\n".format(formatted_row)
 
+    formatted_table = "<table>{}</table>".format(formatted_table)
 
-
-
-    for i in schedule_table:
-        print(i)
-
-    return schedule_table
+    return formatted_table
 
 
 
 formatted_table = build_table(subjects_sample)
-html_table = tabulate(formatted_table, headers, tablefmt="html")
 html = """
     <!DOCTYPE html><html>
     <body><h1><b>{}</b></h1>{}</body></html>
-""".format(title, merge_cells(html_table))
-
+""".format(title, formatted_table)
 html = format_subjects(html, css_sample, subjects_sample)
 render(html, (500,200), "output.png")
 
