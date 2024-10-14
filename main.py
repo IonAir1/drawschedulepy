@@ -3,28 +3,6 @@ from bs4 import BeautifulSoup
 import re
 
 
-title = "Schedule"
-subjects_sample = [
-    {
-        "Code": "math",
-        "Name": "Mathematics",
-        "Color": "lightgreen",
-        "Schedule": [[0b10101,1,3],[0b10,1.5,4]]
-    },
-    {
-        "Code": "sci",
-        "Name": "Science",
-        "Color": "pink",
-        "Schedule": [[0b10101,5,6],[0b1000,1.5,4]]
-    },
-    {
-        "Code": "eng",
-        "Name": "English",
-        "Color": "lightblue",
-        "Schedule": [[0b10,4,6]]
-    }
-]
-
 css_sample = """
 
     body {
@@ -52,7 +30,6 @@ css_sample = """
         border: 1px solid;
     }
 """
-
 
 #replace subject codes with names, add classes to the cells, and style the colors properly
 def format_subjects(html, css, subjects):
@@ -228,14 +205,34 @@ def build_table(subjects, **kwargs):
 
     return formatted_table
 
-
-
-formatted_table = build_table(subjects_sample)
-html = """
-    <!DOCTYPE html><html>
-    <body><h1><b>{}</b></h1>{}</body></html>
-""".format(title, formatted_table)
-html = format_subjects(html, css_sample, subjects_sample)
-render(html, (500,200), "output.png")
+# title = "Schedule"
+# subjects_sample = [
+#     {
+#         "Code": "math",
+#         "Name": "Mathematics",
+#         "Color": "lightgreen",
+#         "Schedule": [[0b10101,1,3],[0b10,1.5,4]]
+#     },
+#     {
+#         "Code": "sci",
+#         "Name": "Science",
+#         "Color": "pink",
+#         "Schedule": [[0b10101,5,6],[0b1000,1.5,4]]
+#     },
+#     {
+#         "Code": "eng",
+#         "Name": "English",
+#         "Color": "lightblue",
+#         "Schedule": [[0b10,4,6]]
+#     }
+# ]
+# 
+# formatted_table = build_table(subjects_sample)
+# html = """
+#     <!DOCTYPE html><html>
+#     <body><h1><b>{}</b></h1>{}</body></html>
+# """.format(title, formatted_table)
+# html = format_subjects(html, css_sample, subjects_sample)
+# render(html, (1280,720), "output.png")
 
 
