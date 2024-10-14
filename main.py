@@ -90,7 +90,9 @@ def format_time(time, am_pm):
             return "12:" + minutes + "AM"
         elif int(time) < 12:
             return str(int(time)) + ":" + minutes + "AM"
-        else:
+        elif int(time) == 12:
+            return str(int(time)) + ":" + minutes + "PM"
+        else :
             return str(int(time)-12) + ":" + minutes + "PM"
     else:
         return str(int(time)) + ":" + minutes
