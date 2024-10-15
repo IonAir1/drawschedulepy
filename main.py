@@ -22,12 +22,16 @@ css_sample = """
     }
 
     table {
-    border-collapse: collapse;
-    width: 100%;
+        border-collapse: collapse;
+        width: 100%;
     }
 
     table, th, td {
         border: 1px solid;
+    }
+
+    td:first-child {
+        width: 20%
     }
 """
 
