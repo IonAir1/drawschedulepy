@@ -84,8 +84,6 @@ def build_table(subjects, **kwargs):
     time_interval = kwargs.get("time_interval", 0.5)
     am_pm = kwargs.get("am_pm", True)
 
-    min_time = 24
-    max_time = 0
     days = []
     schedule_table = []
 
@@ -157,20 +155,40 @@ def build_table(subjects, **kwargs):
                     else:
                         schedule_table[time_slot][7] = "^^"
             
-    #remove empty time
+    #remove the start and end time if set; else remove empty time slots
     old_schedule_table = schedule_table.copy()
-    for period in old_schedule_table:
-        if list(filter(None,period[1:])):
-            break
-        else:
-            schedule_table.pop(0)
-    reversed_schedule_table = schedule_table.copy()
-    reversed_schedule_table.reverse()
-    for period in reversed_schedule_table:
-        if list(filter(None,period[1:])):
-            break
-        else:
-            schedule_table.pop(-1)
+    if kwargs.get('start', None):
+        start_row = int(kwargs.get('start')/time_interval)
+
+        for i in range(len(schedule_table[start_row])):
+            if schedule_table[start_row][i] == "^^":
+                if schedule_table[start_row-1][i][1] <= 2:
+                    old_schedule_table[start_row][i] = schedule_table[start_row-1][i][0]
+                else:
+                    old_schedule_table[start_row][i] = (schedule_table[start_row-1][i][0], schedule_table[start_row-1][i][1]-1)
+                
+
+        schedule_table = old_schedule_table[start_row:]
+    else:
+        min_time = 24
+        for period in old_schedule_table:
+            if list(filter(None,period[1:])):
+                break
+            else:
+                schedule_table.pop(0)
+
+    if kwargs.get('end', None):
+        old_schedule_table = schedule_table.copy()
+        schedule_table = old_schedule_table[:int((kwargs.get('end')-kwargs.get('start',0))/time_interval)]
+    else:
+        max_time = 0
+        reversed_schedule_table = schedule_table.copy()
+        reversed_schedule_table.reverse()
+        for period in reversed_schedule_table:
+            if list(filter(None,period[1:])):
+                break
+            else:
+                schedule_table.pop(-1)
     
     #remove empty days
     days = sorted(days, key=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index)

@@ -65,6 +65,7 @@ def extract_sched(text):
 
 def read_pdf_table(file):
     schedule = read_pdf(file, pages="all")[1]
+    print(schedule)
     subjects = []
     for i in range(len(schedule["SUBJECT CODE"])):
         subject = {}
@@ -81,10 +82,8 @@ def read_pdf_table(file):
 
 
 
-
-
-subjects = read_pdf_table("1.pdf")
-formatted_table = main.build_table(subjects)
+subjects = read_pdf_table("2.pdf")
+formatted_table = main.build_table(subjects, start=12.5)
 html = """
     <!DOCTYPE html><html>
     <body><h1><b>{}</b></h1>{}</body></html>
