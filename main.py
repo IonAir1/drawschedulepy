@@ -33,6 +33,11 @@ css_sample = """
     td:first-child {
         width: 20%
     }
+
+    p.online {
+    color:red
+    }
+    
 """
 
 #replace subject codes with names, add classes to the cells, and style the colors properly
@@ -42,8 +47,16 @@ def format_subjects(html, css, subjects):
         code = subject['Code']
         name = subject['Name']
         for element in soup.find_all('td', string=re.compile(code)):
-            element['class'] = code
             element.string = name
+
+            if element.get("class") == ["online"]:
+                online_tag = soup.new_tag("p")
+                element.append(online_tag)
+                online_tag.string = "(Synchronous)"
+                online_tag['class'] = "online"
+
+            element['class'] = code
+            
         
         css += "\ntd.{} {{background: {} }}".format(code, subject['Color'])
 
@@ -83,6 +96,7 @@ def format_time(time, am_pm):
 def build_table(subjects, **kwargs):
     time_interval = kwargs.get("time_interval", 0.5)
     am_pm = kwargs.get("am_pm", True)
+    online = kwargs.get("online", None)
 
     days = []
     schedule_table = []
@@ -212,15 +226,20 @@ def build_table(subjects, **kwargs):
     
     for row in schedule_table:
         formatted_row = ""
-        for cell in row:
-            if type(cell) is str:
-                if cell != "^^":
-                    formatted_row += "<td>{}</td>".format(cell)
+        for i in range(len(row)):
+            if type(row[i]) is str:
+                if row[i] != "^^":
+                    formatted_row += "<td>{}</td>".format(row[i])
             else:
-                if cell[1] > 1:
-                    formatted_row += "<td rowspan={}>{}</td>".format(cell[1], cell[0])
+                online_text = ""
+                if online:
+                    if i-1 in online:
+                        online_text = "class=online"
+
+                if row[i][1] > 1:
+                    formatted_row += "<td {} rowspan={}>{}</td>".format(online_text, row[i][1], row[i][0])
                 else:
-                    formatted_row += "<td/>".format(cell[0])
+                    formatted_row += "<td/ {}>".format(online_text, row[i][0])
         formatted_table += "<tr>{}</tr>\n".format(formatted_row)
 
     formatted_table = "<table>{}</table>".format(formatted_table)

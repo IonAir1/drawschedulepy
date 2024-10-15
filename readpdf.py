@@ -98,7 +98,7 @@ def read_pdf_table(file):
 
 
 subjects = read_pdf_table("3.pdf")
-formatted_table = main.build_table(subjects, start=12.5)
+formatted_table = main.build_table(subjects, start=12.5, online=[1])
 html = """
     <!DOCTYPE html><html>
     <body><h1><b>{}</b></h1>{}</body></html>
