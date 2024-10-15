@@ -3,6 +3,7 @@ from tabulate import tabulate
 import re
 import random
 import main
+import pandas as pd
 
 
 colors = ["lightcoral","lightsalmon","lightpink","lightyellow","moccasin","khaki","lavander","plum","thistle","palegreen","lightseagreen","yellowgreen","lightcyan","lightsteelblue","powderblue","gainsboro"]
@@ -65,13 +66,27 @@ def extract_sched(text):
 
 def read_pdf_table(file):
     schedule = read_pdf(file, pages="all")[1]
-    print(schedule)
+
+    #remove nan
+    if len(schedule.columns) >5:
+        new_schedule = pd.DataFrame({'SUBJECT CODE':[],'DESCRIPTION':[],'SECTION':[],'DAYSCHEDULEROOM':[]})
+
+        for index, row in schedule.iterrows():
+            curr_row = row.to_list()
+            dayscheduleroom = "".join(curr_row[3:6])
+            if curr_row[0] == curr_row[0]:
+                new_schedule = pd.concat([new_schedule, pd.DataFrame({'SUBJECT CODE':[curr_row[0]],'DESCRIPTION':[curr_row[1]],'SECTION':[curr_row[2]],'DAYSCHEDULEROOM':[dayscheduleroom]})])
+            else:
+                new_schedule.iloc[len(new_schedule)-1]['DAYSCHEDULEROOM'] += "\r" + dayscheduleroom
+        schedule = new_schedule
+
+
     subjects = []
     for i in range(len(schedule["SUBJECT CODE"])):
         subject = {}
-        subject['Code'] = schedule["SUBJECT CODE"][i]
-        subject['Name'] = schedule['DESCRIPTION'][i]
-        subject['Schedule'] = extract_sched(schedule['DAYSCHEDULEROOM'][i])
+        subject['Code'] = schedule.iloc[i]["SUBJECT CODE"]
+        subject['Name'] = schedule.iloc[i]['DESCRIPTION']
+        subject['Schedule'] = extract_sched(schedule.iloc[i]['DAYSCHEDULEROOM'])
 
         color = random.choice(colors)
         colors.remove(color)
@@ -82,7 +97,7 @@ def read_pdf_table(file):
 
 
 
-subjects = read_pdf_table("2.pdf")
+subjects = read_pdf_table("3.pdf")
 formatted_table = main.build_table(subjects, start=12.5)
 html = """
     <!DOCTYPE html><html>
