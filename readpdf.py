@@ -1,7 +1,11 @@
 from tabula import read_pdf
 from tabulate import tabulate
 import re
+import random
 import main
+
+
+colors = ["lightcoral","lightsalmon","lightpink","lightyellow","moccasin","khaki","lavander","plum","thistle","palegreen","lightseagreen","yellowgreen","lightcyan","lightsteelblue","powderblue","gainsboro"]
 
 
 def convert_time(text):
@@ -66,8 +70,12 @@ def read_pdf_table(file):
         subject = {}
         subject['Code'] = schedule["SUBJECT CODE"][i]
         subject['Name'] = schedule['DESCRIPTION'][i]
-        subject['Color'] = 'white'
         subject['Schedule'] = extract_sched(schedule['DAYSCHEDULEROOM'][i])
+
+        color = random.choice(colors)
+        colors.remove(color)
+        subject['Color'] = color
+
         subjects.append(subject)
     return subjects
 
